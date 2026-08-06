@@ -3,19 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>J2ME Player</title>
+  <title>J2ME Web</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #121212; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+    body { background: #121212; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
     .phone { width: 100%; max-width: 360px; background: #1e1e1e; border-radius: 16px; padding: 12px; border: 2px solid #333; }
-    .screen { width: 100%; height: 260px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
-    canvas { width: 100% !important; height: 100% !important; object-fit: contain; }
-    #msg { position: absolute; color: #888; font-size: 13px; text-align: center; }
-    .keypad { margin-top: 12px; }
-    .soft-keys { display: flex; justify-content: space-between; margin-bottom: 8px; }
-    .btn { background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; text-align: center; }
+    .screen { width: 100%; height: 280px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #333; }
+    iframe { width: 100%; height: 100%; border: none; }
+    .keypad { margin-top: 10px; }
+    .soft-keys { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .btn { background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
     .soft-btn { width: 48%; }
-    .dpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 160px; margin: 0 auto 10px auto; }
+    .dpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 150px; margin: 0 auto 8px auto; }
     .ok-btn { background: #00e676; color: #000; border: none; }
     .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
   </style>
@@ -24,63 +23,36 @@
 
 <div class="phone">
   <div class="screen">
-    <canvas id="canvas" width="240" height="320"></canvas>
-    <div id="msg">Đang khởi động...</div>
+    <!-- Embed web giả lập chuẩn HTML5 không dính CORS -->
+    <iframe id="emu" src="https://j2me.js.org/meon/?jar=https://cdn.jsdelivr.net/gh/Lovanhoai/game-files@master/thachsanh.jar"></iframe>
   </div>
   <div class="keypad">
     <div class="soft-keys">
-      <button class="btn soft-btn" onclick="k(112)">Trái</button>
-      <button class="btn soft-btn" onclick="k(113)">Phải</button>
+      <button class="btn soft-btn" onclick="send(112)">Trái</button>
+      <button class="btn soft-btn" onclick="send(113)">Phải</button>
     </div>
     <div class="dpad">
-      <div></div><button class="btn" onclick="k(38)">▲</button><div></div>
-      <button class="btn" onclick="k(37)">◄</button>
-      <button class="btn ok-btn" onclick="k(13)">OK</button>
-      <button class="btn" onclick="k(39)">►</button>
-      <div></div><button class="btn" onclick="k(40)">▼</button><div></div>
+      <div></div><button class="btn" onclick="send(38)">▲</button><div></div>
+      <button class="btn" onclick="send(37)">◄</button>
+      <button class="btn ok-btn" onclick="send(13)">OK</button>
+      <button class="btn" onclick="send(39)">►</button>
+      <div></div><button class="btn" onclick="send(40)">▼</button><div></div>
     </div>
     <div class="num-pad">
-      <button class="btn" onclick="k(49)">1</button><button class="btn" onclick="k(50)">2</button><button class="btn" onclick="k(51)">3</button>
-      <button class="btn" onclick="k(52)">4</button><button class="btn" onclick="k(53)">5</button><button class="btn" onclick="k(54)">6</button>
-      <button class="btn" onclick="k(55)">7</button><button class="btn" onclick="k(56)">8</button><button class="btn" onclick="k(57)">9</button>
-      <button class="btn" onclick="k(42)">*</button><button class="btn" onclick="k(48)">0</button><button class="btn" onclick="k(35)">#</button>
+      <button class="btn" onclick="send(49)">1</button><button class="btn" onclick="send(50)">2</button><button class="btn" onclick="send(51)">3</button>
+      <button class="btn" onclick="send(52)">4</button><button class="btn" onclick="send(53)">5</button><button class="btn" onclick="send(54)">6</button>
+      <button class="btn" onclick="send(55)">7</button><button class="btn" onclick="send(56)">8</button><button class="btn" onclick="send(57)">9</button>
+      <button class="btn" onclick="send(42)">*</button><button class="btn" onclick="send(48)">0</button><button class="btn" onclick="send(35)">#</button>
     </div>
   </div>
 </div>
 
-<!-- Nạp JSZip + J2ME Engine hỗ trợ ArrayBuffer -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/nikita36078/J2ME-Loader@gh-pages/j2me.js"></script>
-
 <script>
-  const msg = document.getElementById('msg');
-  const jarUrl = 'https://cdn.jsdelivr.net/gh/Lovanhoai/game-files@master/thachsanh.jar';
-
-  window.addEventListener('load', function() {
-    msg.innerText = "Đang tải file game...";
-    fetch(jarUrl)
-      .then(res => {
-        if (!res.ok) throw new Error("Lỗi mạng");
-        return res.arrayBuffer();
-      })
-      .then(buffer => {
-        msg.style.display = 'none';
-        if (typeof J2ME !== 'undefined' && J2ME.loadJARBuffer) {
-          J2ME.loadJARBuffer(buffer);
-        } else if (typeof J2ME !== 'undefined') {
-          J2ME.loadJAR(jarUrl);
-        }
-      })
-      .catch(err => {
-        msg.innerText = "Lỗi nạp game!";
-        console.error(err);
-      });
-  });
-
-  function k(code) {
-    document.dispatchEvent(new KeyboardEvent('keydown', { keyCode: code }));
-    setTimeout(() => {
-      document.dispatchEvent(new KeyboardEvent('keyup', { keyCode: code }));
+  function send(k) {
+    var win = document.getElementById('emu').contentWindow;
+    win.postMessage({ type: 'keydown', keyCode: k }, '*');
+    setTimeout(function() {
+      win.postMessage({ type: 'keyup', keyCode: k }, '*');
     }, 100);
   }
 </script>
