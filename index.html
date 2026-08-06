@@ -50,7 +50,8 @@
 <script>
   window.onload = function() {
     if (typeof J2ME !== 'undefined') {
-      J2ME.loadJAR('https://raw.githubusercontent.com/Lovanhoai/game-files/master/thachsanh.jar');
+      // Dùng CDN jsDelivr để bỏ qua chặn CORS từ GitHub Raw
+      J2ME.loadJAR('https://cdn.jsdelivr.net/gh/Lovanhoai/game-files@master/thachsanh.jar');
     }
   };
 
