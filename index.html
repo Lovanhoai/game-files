@@ -3,25 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>J2ME Web Emulator</title>
+  <title>J2ME Player</title>
   <style>
-    body { margin: 0; background: #000; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
-    #container { width: 100%; max-width: 400px; text-align: center; }
-    iframe { width: 100%; height: 650px; border: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #121212; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
+    .phone { width: 100%; max-width: 360px; background: #1e1e1e; border-radius: 16px; padding: 12px; border: 2px solid #333; }
+    .screen { width: 100%; height: 260px; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    canvas { width: 100% !important; height: 100% !important; object-fit: contain; }
+    .keypad { margin-top: 12px; }
+    .soft-keys { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .btn { background: #2a2a2a; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; text-align: center; }
+    .soft-btn { width: 48%; }
+    .dpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 160px; margin: 0 auto 10px auto; }
+    .ok-btn { background: #00e676; color: #000; border: none; }
+    .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
   </style>
 </head>
 <body>
-  <div id="container">
-    <iframe id="emu-frame" src=""></iframe>
-  </div>
 
-  <script>
-    // Tự động lấy tham số file game từ URL (ví dụ: ?game=thachsanh.jar)
-    const urlParams = new URLSearchParams(window.location.search);
-    const gameFile = urlParams.get('game') || 'thachsanh.jar';
-    
-    // Nạp game vào Web Emulator
-    document.getElementById('emu-frame').src = 'https://m.emuparadise.li/j2me/play.php?jar=' + encodeURIComponent(window.location.origin + window.location.pathname.replace('index.html', '') + gameFile);
-  </script>
+<div class="phone">
+  <div class="screen">
+    <canvas id="canvas" width="240" height="320"></canvas>
+  </div>
+  <div class="keypad">
+    <div class="soft-keys">
+      <button class="btn soft-btn" onclick="k(112)">Trái</button>
+      <button class="btn soft-btn" onclick="k(113)">Phải</button>
+    </div>
+    <div class="dpad">
+      <div></div><button class="btn" onclick="k(38)">▲</button><div></div>
+      <button class="btn" onclick="k(37)">◄</button>
+      <button class="btn ok-btn" onclick="k(13)">OK</button>
+      <button class="btn" onclick="k(39)">►</button>
+      <div></div><button class="btn" onclick="k(40)">▼</button><div></div>
+    </div>
+    <div class="num-pad">
+      <button class="btn" onclick="k(49)">1</button><button class="btn" onclick="k(50)">2</button><button class="btn" onclick="k(51)">3</button>
+      <button class="btn" onclick="k(52)">4</button><button class="btn" onclick="k(53)">5</button><button class="btn" onclick="k(54)">6</button>
+      <button class="btn" onclick="k(55)">7</button><button class="btn" onclick="k(56)">8</button><button class="btn" onclick="k(57)">9</button>
+      <button class="btn" onclick="k(42)">*</button><button class="btn" onclick="k(48)">0</button><button class="btn" onclick="k(35)">#</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/gh/nikita36078/J2ME-Loader@gh-pages/j2me.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const game = urlParams.get('file') || 'thachsanh.jar';
+  
+  window.onload = function() {
+    if (typeof J2ME !== 'undefined') {
+      J2ME.loadJAR(game);
+    }
+  };
+
+  function k(code) {
+    document.dispatchEvent(new KeyboardEvent('keydown', { keyCode: code }));
+    setTimeout(() => {
+      document.dispatchEvent(new KeyboardEvent('keyup', { keyCode: code }));
+    }, 100);
+  }
+</script>
 </body>
 </html>
