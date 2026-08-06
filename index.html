@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>J2ME Player</title>
+  <title>J2ME Web Emulator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #121212; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 10px; }
@@ -48,12 +48,9 @@
 
 <script src="https://cdn.jsdelivr.net/gh/nikita36078/J2ME-Loader@gh-pages/j2me.js"></script>
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const game = urlParams.get('file') || 'thachsanh.jar';
-  
   window.onload = function() {
     if (typeof J2ME !== 'undefined') {
-      J2ME.loadJAR(game);
+      J2ME.loadJAR('./thachsanh.jar');
     }
   };
 
